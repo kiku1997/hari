@@ -1,0 +1,171 @@
+ Amazon EC2 ssh timeout due inactivity: https://stackoverflow.com/questions/7210011/amazon-ec2-ssh-timeout-due-inactivity
+
+# echo 'ClientAliveInterval 60' | sudo tee --append /etc/ssh/sshd_config
+
+# sudo systemctl restart sshd.service
+
+# https://www.tutorialspoint.com/devops_tutorials.htm
+
+# https://www.javatpoint.com/linux-commands
+
+# https://www.guru99.com/unix-linux-tutorial.html
+
+		<<<<----Linux commands for user and grop creation---->>>>
+
+# How to Create a New User in Linux => sudo useradd username , sudo passwd username
+
+# How to Add a New User and Create Home Directory => sudo useradd -m username
+
+# Creating a User with Specific Home Directory => sudo useradd -m -d /opt/username username
+
+# Creating a User with Specific User ID => sudo useradd -u 1500 username
+
+# You can verify the user’s UID => id -u username
+
+# Creating a User with Specific Group ID => sudo useradd -g users username
+
+# Creating a User and Assign Multiple Groups => sudo useradd -g users -G wheel,developers username
+
+# Creating a User with Specific Login Shell => sudo useradd -s /usr/bin/zsh username , grep username /etc/passwd
+
+# Creating a User with Custom Comment => sudo useradd -c "Test User Account" username , grep username /etc/passwd
+
+# Creating a User with an Expiry Date => sudo useradd -e 2019-01-22 username , sudo chage -l username
+
+            			<<<<----installing jenkins---->>>>
+
+$ yum install java
+
+$ wget -O /etc/yum.repos.d/jenkins.repo\https://pkg.jenkins.io/redhat-stable/jenkins.repo
+
+$ rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+
+$ yum upgrade
+
+$ yum install jenkins																																																	
+
+$ manage plugins --> 1.conditional buildstep 2.deploy to container 3.environment injector 4.git parameter
+		     5.github organization folder 6.pipeline maven integration 7.push over ssh 8.maven invoker
+
+  $ Setting Environment For Maven -->> /etc/vi environment
+	#set maven environment -->>MAVEN_HOME = '/usr/share/maven' , read the file -->> cat /etc/environment, compile -->> source /etc/environment
+								     call the variable --> echo $MAVEN_HOME ,check home path --> ls -lrta
+
+------------------- jenkins pipeline syntax -----------
+
+pipeline {
+    agent any
+    stages {
+        stage('clone') {
+            steps {
+             git 'https://github.com/wakaleo/game-of-life.git'   
+            }
+        }
+        stage('build') {
+            steps {
+                sh 'mvn clean install'
+            }
+            
+        }
+        stage('deploy') {
+            steps {
+                deploy adapters: [tomcat9(credentialsId: '45394a13-5b2a-421d-998d-14cb3c957ddd', path: '', url: 'http://3.7.254.255:8080/')], contextPath: null, war: '**/*.war'
+        }
+        }
+    }
+}
+
+								
+			<<<<----Installing tomcat---->>>>
+
+# cd /opt,mkdir tomcat
+
+# go to tomcat server select tomcat9 server there copy the link address of tar.gz
+
+# wget link address
+
+# tar -xvf file
+
+# ps -ef |grep tomcat --> checking tomcat either started or not
+
+# /opt/tomcat/apache-tomcat-9.041#cd conf/ -->ls -l -->vi tomcat-user.xml here we have to add roles
+
+# /opt/tomcat/apache-tomcat-9.041/webapps/cd manager/ls-l-->cd meta-inf-->ls-l-->vi context.xml here add |.*
+
+# /opt/tomcat/apache-tomcat-9.041/webapps/cd host-manager/ls-l-->cd meta-inf-->ls-l-->vi context.xml here add |.*
+
+
+			<<<<----Automation for tomcat---->>>>
+
+sudo vi /etc/systemd/system/tomcat.service
+
+
+[Unit]
+Description=tomcat service
+After=syslog.target network.target
+
+[Service]
+Type=forking
+
+ExecStart=/opt/tomcat/apache-tomcat-9.0.43/bin/startup.sh start , /opt/artifactory-oss-7.15.3/app/bin
+ExecStop=/opt/tomcat/apache-tomcat-9.0.43/bin/startup.sh stop
+
+User=root
+Group=root
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+[Unit]
+Description=jfrog service
+After=syslog.target network.target
+
+[Service]
+Type=forking
+
+ExecStart=/opt/artifactory-oss-7.15.3/app/bin/artifactory.sh start
+ExecStop=/opt/artifactory-oss-7.15.3/app/bin/artifactory.sh stop
+
+User=root
+Group=root
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+$ go to /etc/init.d here one link will be there open that link and create a file with an information given above
+
+               <<<--------- Nexus integration ----------->>>
+
+
+./nexus start
+export RUN_AS_USER=root
+ip:8081/nexus
+
+plugins:Nexus artifact uploader
+	zentimestamp
+managejenkins -> configurations -> global properties -> build time stamp -> yyyymmdd and save
+
+
+Nexus Version	NEXUS2
+Protocol	HTTP
+Nexus URL	172.31.13.116:8081/nexus
+Credentials	admin/******
+GroupId	        dev
+Version	    	$BUILD_ID
+Repository	gameoflife
+ 	
+Artifacts
+	
+Artifact	
+ArtifactId	$BUILD_TIMESTAMP
+Type		war
+Classifier	
+File		gameoflife-web/target/gameoflife.war
+
+
+
+
+ 
+
